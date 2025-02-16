@@ -15,7 +15,7 @@ const updateItemQuality = (item: Item): Item => {
   return item;
 };
 
-const increaseQualityForConcert = (item: Item): number => {
+const getQualityLevelForConcert = (item: Item): number => {
   let quality = increaseItemQuality(item.quality);
   quality = item.sellIn < 11 ? increaseItemQuality(quality) : quality;
   quality = item.sellIn < 6 ? increaseItemQuality(quality) : quality;
@@ -33,7 +33,7 @@ export const updateQualityBasedOnSellIn = (item: Item): Item => {
 };
 
 export const updateQualityForBackstagePasConcert = (item: Item): Item => {
-  item.quality = item.sellIn <= 0 ? 0 : increaseQualityForConcert(item);
+  item.quality = item.sellIn <= 0 ? 0 : getQualityLevelForConcert(item);
   decreaseSellIn(item);
 
   return item;
