@@ -22,21 +22,23 @@ export class GildedRose {
   updateQuality(): Item[] {
     this.items.forEach((currentItem: Item) => {
       const { name } = currentItem;
+      const containsUid = (uid: string) => name.includes(uid);
 
       if (itemsThatIncreaseInQualityTheOlderTheyGet.includes(name))
         return updateQualityBasedOnSellIn(currentItem);
 
-      if (name.includes(backstagePassUid))
+      if (containsUid(backstagePassUid))
         return updateQualityForBackstagePasConcert(currentItem);
 
-      if (name.includes(legendaryItemUid))
+      if (containsUid(legendaryItemUid))
         return updateQualityForLegendaryItem(currentItem);
 
-      if (name.includes(conjuredUid))
+      if (containsUid(conjuredUid))
         return updateQualityForConjuredItem(currentItem);
 
       return updateQualityForNormalItem(currentItem);
     });
+
     return this.items;
   }
 }
