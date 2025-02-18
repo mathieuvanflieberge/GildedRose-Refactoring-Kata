@@ -1,32 +1,27 @@
 import { Item } from "./classes/item";
-
-const MAXIMUM_QUALITY = 50;
-const MINIMUM_QUALITY = 0;
-
-const increaseItemQuality = (q: number) => (q < MAXIMUM_QUALITY ? q + 1 : q);
-const decreaseItemQuality = (q: number) => (q > MINIMUM_QUALITY ? q - 1 : q);
-const decreaseSellIn = (item: Item) => (item.sellIn -= 1);
+import { decreaseQuality } from "./helpers/decreaseQuality";
+import { decreaseSellIn } from "./helpers/decreaseSellIn";
+import { increaseQuality } from "./helpers/increaseQuality";
 
 const updateItemQuality = (item: Item): Item => {
-  item.quality = decreaseItemQuality(item.quality);
+  item.quality = decreaseQuality(item.quality);
   item.quality =
-    item.sellIn <= 0 ? decreaseItemQuality(item.quality) : item.quality;
+    item.sellIn <= 0 ? decreaseQuality(item.quality) : item.quality;
 
   return item;
 };
 
-const getQualityLevelForConcert = (item: Item): number => {
-  let quality = increaseItemQuality(item.quality);
-  quality = item.sellIn < 11 ? increaseItemQuality(quality) : quality;
-  quality = item.sellIn < 6 ? increaseItemQuality(quality) : quality;
+const getQualityLevelForConcert = ({ quality, sellIn }: Item): number => {
+  const newQuality = increaseQuality(quality);
+  if (sellIn <= 5) return increaseQuality(newQuality, 2);
+  if (sellIn <= 10) return increaseQuality(newQuality);
 
-  return quality;
+  return newQuality;
 };
 
 export const updateQualityBasedOnSellIn = (item: Item): Item => {
-  item.quality = increaseItemQuality(item.quality);
-  item.quality =
-    item.sellIn < 0 ? increaseItemQuality(item.quality) : item.quality;
+  item.quality = increaseQuality(item.quality);
+  item.quality = item.sellIn < 0 ? increaseQuality(item.quality) : item.quality;
   decreaseSellIn(item);
 
   return item;
@@ -39,19 +34,13 @@ export const updateQualityForBackstagePasConcert = (item: Item): Item => {
   return item;
 };
 
-export const updateQualityForLegendaryItem = (item: Item): Item => {
-  item.quality = 80;
-
-  return item;
-};
+export const updateQualityForLegendaryItem = (item: Item): Item =>
+  ({ ...item, quality: 80 } as Item);
 
 export const updateQualityForConjuredItem = (item: Item): Item => {
-  if (item.sellIn === 5) {
-    item.quality -= 3;
-  } else {
-    item = updateItemQuality(item);
-    item = updateItemQuality(item);
-  }
+  item.sellIn === 5
+    ? (item.quality -= 3)
+    : (item = updateItemQuality(updateItemQuality(item)));
   decreaseSellIn(item);
 
   return item;
