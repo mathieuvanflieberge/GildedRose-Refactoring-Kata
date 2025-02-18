@@ -1,53 +1,115 @@
-_Support this and all my katas via [Patreon](https://www.patreon.com/EmilyBache)_
-
 # Gilded Rose Refactoring Kata
 
-You can find out more about this exercise in my YouTube video [Why Developers LOVE The Gilded Rose Kata](https://youtu.be/Mt4XpGxigT4). I also have a video of a worked solution in Java - [Gilded Rose Kata, Hands-on](https://youtu.be/OdnV8hc9L7I)
+This repository contains my solution to the **Gilded Rose Refactoring Kata**, refactored in **TypeScript**. The Gilded Rose Kata is a well-known exercise that focuses on refactoring and improving the design of existing code, ensuring maintainability and extensibility. In this refactor, I followed object-oriented principles to improve code structure, readability, and extendability.
 
-I use this kata as part of my work as a technical coach. I wrote a lot about the coaching method I use in this book [Technical Agile Coaching with the Samman method](https://leanpub.com/techagilecoach). A while back I wrote this article ["Writing Good Tests for the Gilded Rose Kata"](http://coding-is-like-cooking.info/2013/03/writing-good-tests-for-the-gilded-rose-kata/) about how you could use this kata in a [coding dojo](https://leanpub.com/codingdojohandbook).
+## Refactoring Approach
 
+The refactoring approach focuses on simplifying and organizing the logic behind updating the quality of different items in the store. The main goal was to handle each item type (e.g., `Aged Brie`, `Backstage passes`, etc.) individually using a set of helper functions, while adhering to the **Open/Closed Principle**.
 
-## How to use this Kata
+### Key Changes:
 
-The simplest way is to just clone the code and start hacking away improving the design. You'll want to look at the ["Gilded Rose Requirements"](https://github.com/emilybache/GildedRose-Refactoring-Kata/blob/main/GildedRoseRequirements.md) which explains what the code is for. I strongly advise you that you'll also need some tests if you want to make sure you don't break the code while you refactor.
+- **Modularized logic**: Separated the logic for updating the quality of different item types into specific helper functions (e.g., `updateQualityForBackstagePasConcert`, `updateQualityForLegendaryItem`, etc.).
+- **Simplified conditionals**: Consolidated repeated code (like updating quality and sell-in values) into helper functions to avoid duplication and make the code more maintainable.
+- **Better item handling**: Each item type has its own logic for updating its quality and sell-in values, which makes it easier to extend the application with new types of items in the future.
 
-You could write some unit tests yourself, using the requirements to identify suitable test cases. I've provided a failing unit test in a popular test framework as a starting point for most languages.
+### The `updateQuality` function
 
-Alternatively, use the Approval tests provided in this repository. (Read more about that in the section "Text-based Approval Testing").
+The `updateQuality` function iterates through each item and applies the appropriate helper function based on the item's characteristics. The main changes include:
 
-The idea of the exercise is to do some deliberate practice, and improve your skills at designing test cases and refactoring. The idea is not to re-write the code from scratch, but rather to practice taking small steps, running the tests often, and incrementally improving the design. 
+1. **Items that increase in quality as they get older** (like `Aged Brie`) are handled by the `updateQualityBasedOnSellIn` function.
+2. **Backstage passes** are handled by `updateQualityForBackstagePasConcert`, which takes into account the quality increase based on sell-in values.
+3. **Legendary items** have a fixed quality of 80, so they're handled by `updateQualityForLegendaryItem`.
+4. **Conjured items** are processed by `updateQualityForConjuredItem`, where quality is adjusted differently depending on sell-in values.
+5. **Normal items** are processed by the `updateQualityForNormalItem` function.
 
-### Gilded Rose Requirements in other languages 
+The updated `updateQuality` function looks like this:
 
-- [English](GildedRoseRequirements.md)
-- [Español](GildedRoseRequirements_es.md)
-- [Français](GildedRoseRequirements_fr.md)
-- [Italiano](GildedRoseRequirements_it.md)
-- [日本語](GildedRoseRequirements_jp.md)
-- [Português](GildedRoseRequirements_pt-BR.md)
-- [Русский](GildedRoseRequirements_ru.md)
-- [ไทย](GildedRoseRequirements_th.md)
-- [中文](GildedRoseRequirements_zh.txt)
-- [한국어](GildedRoseRequirements_kr.md)
-- [German](GildedRoseRequirements_de.md)
-- [Euskara](GildedRoseRequirements_eu.md)
+```typescript
+updateQuality(): Item[] {
+  this.items.forEach((currentItem: Item) => {
+    const { name } = currentItem;
+    const containsUid = (uid: string) => name.includes(uid);
 
-## Text-Based Approval Testing
+    if (itemsThatIncreaseInQualityTheOlderTheyGet.includes(name))
+      return updateQualityBasedOnSellIn(currentItem);
 
-Most language versions of this code have a [TextTest](https://texttest.org) fixture for Approval testing. For information about this, see the [TextTests README](https://github.com/emilybache/GildedRose-Refactoring-Kata/tree/main/texttests)
+    if (containsUid(backstagePassUid))
+      return updateQualityForBackstagePasConcert(currentItem);
 
-## History of the exercise
+    if (containsUid(legendaryItemUid))
+      return updateQualityForLegendaryItem(currentItem);
 
-This Kata was originally created by Terry Hughes (http://twitter.com/TerryHughes). It is already on GitHub [here](https://github.com/NotMyself/GildedRose). Bobby Johnson described the kata in an article titled "Refactor This: The Gilded Rose Kata", but unfortunately it is no longer on the internet. I found it on the Wayback Machine [here](https://web.archive.org/web/20240525015111/https://iamnotmyself.com/refactor-this-the-gilded-rose-kata/).
+    if (containsUid(conjuredUid))
+      return updateQualityForConjuredItem(currentItem);
 
-I translated the original C# into a few other languages, (with a little help from my friends!), and slightly changed the starting position. This means I've actually done a small amount of refactoring already compared with the original form of the kata, and made it easier to get going with writing tests by giving you one failing unit test to start with. I also added test fixtures for Text-Based approval testing with TextTest (see [the TextTests](https://github.com/emilybache/GildedRose-Refactoring-Kata/tree/main/texttests))
+    return updateQualityForNormalItem(currentItem);
+  });
 
-As Bobby Johnson points out in his article "Why Most Solutions to Gilded Rose Miss The Bigger Picture" (on the Wayback Machine [here](https://web.archive.org/web/20230530152324/https://iamnotmyself.com/why-most-solutions-to-gilded-rose-miss-the-bigger-picture/)), it'll actually give you
-better practice at handling a legacy code situation if you do this Kata in the original C#. However, I think this kata
-is also really useful for practicing writing good tests using different frameworks and approaches, and the small changes I've made help with that. I think it's also interesting to compare what the refactored code and tests look like in different programming languages.
+  return this.items;
+}
+```
+
+### Helper Functions
+
+Several helper functions are used to handle specific logic for updating item quality and sell-in values:
+
+- **`updateItemQuality`**: A helper function that decreases an item's quality based on whether its sell-in date has passed.
+- **`getQualityLevelForConcert`**: A function that increases the quality of Backstage passes based on the remaining sell-in days.
+- **`updateQualityBasedOnSellIn`**: Handles the logic for items that increase in quality as their sell-in date gets closer (e.g., `Aged Brie`).
+- **`updateQualityForBackstagePasConcert`**: Special logic for updating the quality of Backstage passes.
+- **`updateQualityForLegendaryItem`**: Ensures that legendary items always have a quality of 80.
+- **`updateQualityForConjuredItem`**: Applies special logic to Conjured items, which degrade in quality twice as fast as normal items.
+- **`updateQualityForNormalItem`**: Standard logic for handling normal items (decreases quality and sell-in).
+
+## Setup Instructions
+
+### Running the TextTest Fixture
+
+You can also run the TextTest fixture from the command line to check the behavior of the items. You may need to install `ts-node` if you don’t have it installed: `npm install -g ts-node`
+
+To run the test:
+
+```bash
+npx ts-node test/golden-master-text-test.ts
+```
+
+If you want to run the test with a custom number of days as an argument:
+
+```bash
+npx ts-node test/golden-master-text-test.ts 10
+```
+
+This will print the output for the specified number of days.
+
+## Tests
+
+This project uses **Jest** for testing. The tests are designed to verify that the refactored implementation produces the correct output for the Gilded Rose problem. The testing strategy mainly focuses on comparing the output of the `updateQuality` function with pre-approved snapshots.
+
+### Snapshot Testing with Jest
+
+Instead of manually writing individual test cases for each item, the tests are based on snapshot testing. When running the tests for the first time, Jest will generate a snapshot file (e.g., `approvals.spec.ts.snap`). This snapshot represents the expected output of the `updateQuality` function for a specific set of items after a certain number of days.
+
+Whenever the implementation is modified, running the tests will compare the current output of `updateQuality` with the saved snapshot. If the output differs, Jest will alert you to the changes, allowing you to verify whether the new output is correct or whether the changes should be discarded.
+
+### Running the Tests
+
+To run the snapshot tests, use the following command:
+
+```bash
+npm run test:jest
+```
 
 ## Contributing
 
-Contributions are encouraged! You could add a translations of the specification
-in another language or a new starting point for your favorite programming
-language. Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
+Feel free to fork this repository and contribute improvements, bug fixes, or additional tests. Open a pull request to propose any changes.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Contact
+
+If you have any questions or would like to get in touch, feel free to reach out to me:
+
+**Name**: Mathieu Van Flieberge  
+**Email**: [mathieu.van.flieberge@hotmail.com](mailto:mathieu.van.flieberge@hotmail.com)
